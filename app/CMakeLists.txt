@@ -4,10 +4,10 @@ include_directories(${APP_GLUE_DIR})
 add_library( app-glue STATIC ${APP_GLUE_DIR}/android_native_app_glue.c)
 set(VK_VAL_LAYER_SRC_DIR ${ANDROID_NDK}/sources/third_party/vulkan/src)
 set(APP_SRC_DIR src/main/cpp)
-set(VULKPP_SRC_DIR src/main/cpp/vulkpp)
+set(NUFRAG_SRC_DIR src/main/cpp/nufrag)
 add_library(
     main SHARED
-    ${VULKPP_SRC}/system/android/application.cpp
+    ${NUFRAG_SRC}/system/android/application.cpp
     ${APP_SRC_DIR}/AndroidMain.cpp
     ${APP_SRC_DIR}/VulkanMain.cpp
     ${APP_SRC_DIR}/vulkan_wrapper.cpp)
