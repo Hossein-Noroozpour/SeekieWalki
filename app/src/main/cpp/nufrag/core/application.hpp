@@ -1,11 +1,11 @@
 #pragma once
 #include "../render/engine.hpp"
-namespace vulkpp {
+namespace nufrag {
     namespace core {
         class Application {
             RenderEngine *render_engine;
         public:
-            void started(RenderEngine *engine);
+            void start(RenderEngine *engine);
             void update();
             void terminate();
         };

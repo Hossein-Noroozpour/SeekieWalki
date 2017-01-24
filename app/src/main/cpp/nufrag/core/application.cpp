@@ -1,13 +1,13 @@
 #include "application.hpp"
 
-void vulkpp::core::Application::started(){
+void nufrag::core::Application::start(RenderEngine *){
 
 }
 
-void vulkpp::core::Application::update(){
+void nufrag::core::Application::update(){
 
 }
 
-void vulkpp::core::Application::terminate(){
+void nufrag::core::Application::terminate(){
 
 }

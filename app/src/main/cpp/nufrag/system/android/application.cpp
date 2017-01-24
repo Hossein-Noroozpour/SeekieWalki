@@ -4,21 +4,21 @@
 #include "../../core/application.hpp"
 #include "../../render/engine.hpp"
 
-#define CORE_APP Application
+#define CORE_APP nufrag::core::Application
 
-static class AppData {
+class AppData {
 public:
     CORE_APP *core_app;
     RenderEngine *engine;
 };
 
 static void handle_cmd(android_app *app, int32_t cmd) {
-    AppData *data = static_cast<AppData>(app->userData);
+    AppData *data = static_cast<AppData *>(app->userData);
     CORE_APP *core_app = data->core_app;
     RenderEngine *engine = data->engine;
     switch (cmd) {
         case APP_CMD_INIT_WINDOW:
-            engine->initialize();
+            engine->start();
             core_app->start(engine);
             break;
         case APP_CMD_TERM_WINDOW:
@@ -30,7 +30,7 @@ static void handle_cmd(android_app *app, int32_t cmd) {
     }
 }
 
-static void android_main(struct android_app *app) {
+void android_main(struct android_app *app) {
     app_dummy();
     CORE_APP *core_app = new CORE_APP;
     RenderEngine *engine = new RenderEngine;

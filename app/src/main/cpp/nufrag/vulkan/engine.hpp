@@ -7,6 +7,8 @@ namespace nufrag {
 
             bool ready();
 
+            void update();
+
             void terminate();
         };
     }
