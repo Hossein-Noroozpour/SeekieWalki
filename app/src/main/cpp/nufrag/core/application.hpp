@@ -3,7 +3,7 @@
 namespace nufrag {
     namespace core {
         class Application {
-            RenderEngine *render_engine;
+//            RenderEngine *render_engine;
         public:
             void start(RenderEngine *engine);
             void update();

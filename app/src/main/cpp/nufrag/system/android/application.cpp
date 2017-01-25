@@ -1,9 +1,9 @@
 #include "application.hpp"
-#include <android/log.h>
 #include <android_native_app_glue.h>
 #include "../../core/application.hpp"
 #include "../../render/engine.hpp"
-
+#include "../log.hpp"
+#include <string>
 #define CORE_APP nufrag::core::Application
 
 class AppData {
@@ -26,7 +26,7 @@ static void handle_cmd(android_app *app, int32_t cmd) {
             engine->terminate();
             break;
         default:
-            __android_log_print(ANDROID_LOG_INFO, "Vulkan Tutorials", "event not handled: %d", cmd);
+            LOGI(std::string("event not handled: ") + std::to_string(cmd));
     }
 }
 
