@@ -6,5 +6,6 @@
 #elif defined(WIN32) || defined(WIN64)
 #define IN_WINDOWS
 #endif
+#define USE_VULKAN
 #define LOG_ENABLED
 #define APPLICATION_NAME "Seeki Walki"

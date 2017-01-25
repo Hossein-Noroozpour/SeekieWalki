@@ -18,14 +18,14 @@
 struct VulkanDeviceInfo {
     bool initialized_;
 
-    VkInstance          instance_;
-    VkPhysicalDevice    gpuDevice_;
-    VkDevice            device_;
+    VkInstance instance_;
+    VkPhysicalDevice gpuDevice_;
+    VkDevice device_;
 
-    VkSurfaceKHR        surface_;
-    VkQueue             queue_;
+    VkSurfaceKHR surface_;
+    VkQueue queue_;
 };
-VulkanDeviceInfo  device;
+VulkanDeviceInfo device;
 
 struct VulkanSwapchainInfo {
     VkSwapchainKHR swapchain_;
@@ -35,10 +35,10 @@ struct VulkanSwapchainInfo {
     VkFormat displayFormat_;
 
     // array of frame buffers and views
-    VkFramebuffer* framebuffers_;
-    VkImageView* displayViews_;
+    VkFramebuffer *framebuffers_;
+    VkImageView *displayViews_;
 };
-VulkanSwapchainInfo  swapchain;
+VulkanSwapchainInfo swapchain;
 
 struct VulkanBufferInfo {
     VkBuffer vertexBuf;
@@ -46,28 +46,27 @@ struct VulkanBufferInfo {
 VulkanBufferInfo buffers;
 
 struct VulkanGfxPipelineInfo {
-    VkPipelineLayout  layout;
-    VkPipelineCache   cache;
-    VkPipeline        pipeline;
+    VkPipelineLayout layout;
+    VkPipelineCache cache;
+    VkPipeline pipeline;
 };
 VulkanGfxPipelineInfo gfxPipeline;
 
 struct VulkanRenderInfo {
     VkRenderPass renderPass_;
     VkCommandPool cmdPool_;
-    VkCommandBuffer* cmdBuffer_;
-    uint32_t         cmdBufferLen_;
-    VkSemaphore   semaphore_;
-    VkFence       fence_;
+    VkCommandBuffer *cmdBuffer_;
+    uint32_t cmdBufferLen_;
+    VkSemaphore semaphore_;
+    VkFence fence_;
 };
 VulkanRenderInfo render;
 
 // Android Native App pointer...
-android_app* androidAppCtx = nullptr;
+android_app *androidAppCtx = nullptr;
 
 // Create vulkan device
-void CreateVulkanDevice(ANativeWindow* platformWindow,
-                        VkApplicationInfo* appInfo) {
+void CreateVulkanDevice(ANativeWindow *platformWindow, VkApplicationInfo *appInfo) {
     std::vector<const char *> instance_extensions;
     std::vector<const char *> device_extensions;
 
@@ -78,7 +77,7 @@ void CreateVulkanDevice(ANativeWindow* platformWindow,
 
     // **********************************************************
     // Create the Vulkan instance
-    VkInstanceCreateInfo instanceCreateInfo {
+    VkInstanceCreateInfo instanceCreateInfo{
             .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
             .pNext = nullptr,
             .pApplicationInfo = appInfo,
@@ -99,14 +98,14 @@ void CreateVulkanDevice(ANativeWindow* platformWindow,
     // Find one GPU to use:
     // On Android, every GPU device is equal -- supporting graphics/compute/present
     // for this sample, we use the very first GPU device found on the system
-    uint32_t  gpuCount = 0;
+    uint32_t gpuCount = 0;
     CALL_VK(vkEnumeratePhysicalDevices(device.instance_, &gpuCount, nullptr));
     VkPhysicalDevice tmpGpus[gpuCount];
     CALL_VK(vkEnumeratePhysicalDevices(device.instance_, &gpuCount, tmpGpus));
     device.gpuDevice_ = tmpGpus[0];     // Pick up the first GPU Device
 
     // Create a logical device (vulkan device)
-    float priorities[] = { 1.0f, };
+    float priorities[] = {1.0f,};
     VkDeviceQueueCreateInfo queueCreateInfo{
             .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
             .pNext = nullptr,
@@ -149,7 +148,7 @@ void CreateSwapChain() {
     uint32_t formatCount = 0;
     vkGetPhysicalDeviceSurfaceFormatsKHR(device.gpuDevice_, device.surface_,
                                          &formatCount, nullptr);
-    VkSurfaceFormatKHR *formats = new VkSurfaceFormatKHR [formatCount];
+    VkSurfaceFormatKHR *formats = new VkSurfaceFormatKHR[formatCount];
     vkGetPhysicalDeviceSurfaceFormatsKHR(device.gpuDevice_, device.surface_,
                                          &formatCount, formats);
     LOGI(std::string("Got formats") + std::to_string(formatCount));
@@ -168,7 +167,7 @@ void CreateSwapChain() {
     // Create a swap chain (here we choose the minimum available number of surface
     // in the chain)
     uint32_t queueFamily = 0;
-    VkSwapchainCreateInfoKHR swapchainCreateInfo {
+    VkSwapchainCreateInfoKHR swapchainCreateInfo{
             .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
             .pNext = nullptr,
             .surface = device.surface_,
@@ -192,18 +191,17 @@ void CreateSwapChain() {
     // Get the length of the created swap chain
     CALL_VK(vkGetSwapchainImagesKHR(device.device_, swapchain.swapchain_,
                                     &swapchain.swapchainLength_, nullptr));
-    delete [] formats;
+    delete[] formats;
     LOGI(std::string("<-createSwapChain"));
 }
 
-void CreateFrameBuffers(VkRenderPass& renderPass,
-                        VkImageView depthView = VK_NULL_HANDLE) {
+void CreateFrameBuffers(VkRenderPass &renderPass, VkImageView depthView = VK_NULL_HANDLE) {
 
     // query display attachment to swapchain
     uint32_t SwapchainImagesCount = 0;
     CALL_VK(vkGetSwapchainImagesKHR(device.device_, swapchain.swapchain_,
                                     &SwapchainImagesCount, nullptr));
-    VkImage* displayImages = new VkImage[SwapchainImagesCount];
+    VkImage *displayImages = new VkImage[SwapchainImagesCount];
     CALL_VK(vkGetSwapchainImagesKHR(device.device_, swapchain.swapchain_,
                                     &SwapchainImagesCount, displayImages));
 
@@ -242,7 +240,7 @@ void CreateFrameBuffers(VkRenderPass& renderPass,
         VkImageView attachments[2] = {
                 swapchain.displayViews_[i], depthView,
         };
-        VkFramebufferCreateInfo fbCreateInfo {
+        VkFramebufferCreateInfo fbCreateInfo{
                 .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
                 .pNext = nullptr,
                 .renderPass = renderPass,
@@ -260,9 +258,7 @@ void CreateFrameBuffers(VkRenderPass& renderPass,
 }
 
 // A helper function
-bool MapMemoryTypeToIndex(uint32_t typeBits,
-                          VkFlags requirements_mask,
-                          uint32_t *typeIndex) {
+bool MapMemoryTypeToIndex(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex) {
     VkPhysicalDeviceMemoryProperties memoryProperties;
     vkGetPhysicalDeviceMemoryProperties(device.gpuDevice_, &memoryProperties);
     // Search memtypes to find first index with those properties
@@ -289,7 +285,7 @@ bool CreateBuffers(void) {
     const float vertexData[] = {
             -1.0f, -1.0f, 0.0f,
             1.0f, -1.0f, 0.0f,
-            0.0f,  1.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
     };
 
     // Create a vertex buffer
@@ -311,7 +307,7 @@ bool CreateBuffers(void) {
     VkMemoryRequirements memReq;
     vkGetBufferMemoryRequirements(device.device_, buffers.vertexBuf, &memReq);
 
-    VkMemoryAllocateInfo allocInfo {
+    VkMemoryAllocateInfo allocInfo{
             .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
             .pNext = nullptr,
             .allocationSize = sizeof(vertexData),
@@ -328,7 +324,7 @@ bool CreateBuffers(void) {
     VkDeviceMemory deviceMemory;
     CALL_VK(vkAllocateMemory(device.device_, &allocInfo, nullptr, &deviceMemory));
 
-    void* data;
+    void *data;
     CALL_VK(vkMapMemory(device.device_, deviceMemory, 0, sizeof(vertexData), 0,
                         &data));
     memcpy(data, vertexData, sizeof(vertexData));
@@ -342,16 +338,18 @@ void DeleteBuffers(void) {
     vkDestroyBuffer(device.device_, buffers.vertexBuf, nullptr);
 }
 
-enum ShaderType { VERTEX_SHADER, FRAGMENT_SHADER };
-VkResult loadShaderFromFile(const char* filePath, VkShaderModule* shaderOut,
-                            ShaderType type) {
+enum ShaderType {
+    VERTEX_SHADER, FRAGMENT_SHADER
+};
+
+VkResult loadShaderFromFile(const char *filePath, VkShaderModule *shaderOut, ShaderType type) {
     // Read the file
     assert(androidAppCtx);
-    AAsset* file = AAssetManager_open(androidAppCtx->activity->assetManager,
+    AAsset *file = AAssetManager_open(androidAppCtx->activity->assetManager,
                                       filePath, AASSET_MODE_BUFFER);
     size_t fileLength = AAsset_getLength(file);
 
-    char* fileContent = new char[fileLength];
+    char *fileContent = new char[fileLength];
 
     AAsset_read(file, fileContent, fileLength);
 
@@ -359,7 +357,7 @@ VkResult loadShaderFromFile(const char* filePath, VkShaderModule* shaderOut,
             .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
             .pNext = nullptr,
             .codeSize = fileLength,
-            .pCode = (const uint32_t*)fileContent,
+            .pCode = (const uint32_t *) fileContent,
             .flags = 0,
     };
     VkResult result = vkCreateShaderModule(
@@ -371,7 +369,6 @@ VkResult loadShaderFromFile(const char* filePath, VkShaderModule* shaderOut,
     return result;
 }
 
-// Create Graphics Pipeline
 VkResult CreateGraphicsPipeline() {
     memset(&gfxPipeline, 0, sizeof(gfxPipeline));
     // Create pipeline layout (empty)
@@ -393,12 +390,12 @@ VkResult CreateGraphicsPipeline() {
             .dynamicStateCount = 0,
             .pDynamicStates = nullptr};
 
-    VkShaderModule vertexShader,fragmentShader;
+    VkShaderModule vertexShader, fragmentShader;
     loadShaderFromFile("shaders/tri.vert.spv", &vertexShader, VERTEX_SHADER);
     loadShaderFromFile("shaders/tri.frag.spv", &fragmentShader, FRAGMENT_SHADER);
 
     // Specify vertex and fragment shader stages
-    VkPipelineShaderStageCreateInfo shaderStages[2] {
+    VkPipelineShaderStageCreateInfo shaderStages[2]{
             {
                     .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                     .pNext = nullptr,
@@ -419,13 +416,13 @@ VkResult CreateGraphicsPipeline() {
             }
     };
 
-    VkViewport viewports {
+    VkViewport viewports{
             .minDepth = 0.0f,
             .maxDepth = 1.0f,
             .x = 0,
             .y = 0,
-            .width = (float)swapchain.displaySize_.width,
-            .height = (float)swapchain.displaySize_.height,
+            .width = (float) swapchain.displaySize_.width,
+            .height = (float) swapchain.displaySize_.height,
     };
 
     VkRect2D scissor = {
@@ -433,7 +430,7 @@ VkResult CreateGraphicsPipeline() {
             .offset = {.x = 0, .y = 0,}
     };
     // Specify viewport info
-    VkPipelineViewportStateCreateInfo viewportInfo {
+    VkPipelineViewportStateCreateInfo viewportInfo{
             .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
             .pNext = nullptr,
             .viewportCount = 1,
@@ -444,7 +441,7 @@ VkResult CreateGraphicsPipeline() {
 
     // Specify multisample info
     VkSampleMask sampleMask = ~0u;
-    VkPipelineMultisampleStateCreateInfo multisampleInfo {
+    VkPipelineMultisampleStateCreateInfo multisampleInfo{
             .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
             .pNext = nullptr,
             .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
@@ -498,7 +495,7 @@ VkResult CreateGraphicsPipeline() {
             .stride = 3 * sizeof(float),
             .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
     };
-    VkVertexInputAttributeDescription vertex_input_attributes[1] {
+    VkVertexInputAttributeDescription vertex_input_attributes[1]{
             {
                     .binding = 0,
                     .location = 0,
@@ -506,7 +503,7 @@ VkResult CreateGraphicsPipeline() {
                     .offset = 0,
             }
     };
-    VkPipelineVertexInputStateCreateInfo vertexInputInfo {
+    VkPipelineVertexInputStateCreateInfo vertexInputInfo{
             .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
             .pNext = nullptr,
             .vertexBindingDescriptionCount = 1,
@@ -516,7 +513,7 @@ VkResult CreateGraphicsPipeline() {
     };
 
     // Create the pipeline cache
-    VkPipelineCacheCreateInfo pipelineCacheInfo {
+    VkPipelineCacheCreateInfo pipelineCacheInfo{
             .sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO,
             .pNext = nullptr,
             .initialDataSize = 0,
@@ -528,7 +525,7 @@ VkResult CreateGraphicsPipeline() {
                                   &gfxPipeline.cache));
 
     // Create the pipeline
-    VkGraphicsPipelineCreateInfo pipelineCreateInfo {
+    VkGraphicsPipelineCreateInfo pipelineCreateInfo{
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
             .pNext = nullptr,
             .flags = 0,
@@ -565,14 +562,8 @@ void DeleteGraphicsPipeline(void) {
     if (gfxPipeline.pipeline == VK_NULL_HANDLE)
         return;
     vkDestroyPipeline(device.device_, gfxPipeline.pipeline, nullptr);
-    vkDestroyPipelineCache(device.device_,gfxPipeline.cache, nullptr);
+    vkDestroyPipelineCache(device.device_, gfxPipeline.cache, nullptr);
     vkDestroyPipelineLayout(device.device_, gfxPipeline.layout, nullptr);
-}
-
-// IsVulkanReady():
-//    native app poll to see if we are ready to draw...
-bool IsVulkanReady(void) {
-    return device.initialized_;
 }
 
 void DeleteSwapChain() {
@@ -586,63 +577,7 @@ void DeleteSwapChain() {
     vkDestroySwapchainKHR(device.device_, swapchain.swapchain_, nullptr);
 }
 
-void DeleteVulkan() {
-    vkFreeCommandBuffers(device.device_, render.cmdPool_,
-                         render.cmdBufferLen_, render.cmdBuffer_);
-    delete[] render.cmdBuffer_;
-
-    vkDestroyCommandPool(device.device_, render.cmdPool_, nullptr);
-    vkDestroyRenderPass(device.device_, render.renderPass_, nullptr);
-    DeleteSwapChain();
-    DeleteGraphicsPipeline();
-    DeleteBuffers();
-
-    vkDestroyDevice(device.device_, nullptr);
-    vkDestroyInstance(device.instance_, nullptr);
-
-    device.initialized_ = false;
-}
-
-// Draw one frame
-bool VulkanDrawFrame(void) {
-    uint32_t nextIndex;
-    // Get the framebuffer index we should draw in
-    CALL_VK(vkAcquireNextImageKHR(device.device_, swapchain.swapchain_,
-                                  UINT64_MAX, render.semaphore_,
-                                  VK_NULL_HANDLE, &nextIndex));
-    CALL_VK(vkResetFences(device.device_, 1, &render.fence_));
-    VkSubmitInfo submit_info = {
-            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-            .pNext = nullptr,
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &render.semaphore_,
-            .commandBufferCount = 1,
-            .pCommandBuffers = &render.cmdBuffer_[nextIndex],
-            .signalSemaphoreCount = 0,
-            .pSignalSemaphores = nullptr
-    };
-    CALL_VK(vkQueueSubmit(device.queue_, 1, &submit_info, render.fence_));
-    CALL_VK(vkWaitForFences(device.device_, 1, &render.fence_, VK_TRUE, 100000000));
-
-    LOGI(std::string("Drawing frames......"));
-
-    VkResult result;
-    VkPresentInfoKHR presentInfo {
-            .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-            .pNext = nullptr,
-            .swapchainCount = 1,
-            .pSwapchains = &swapchain.swapchain_,
-            .pImageIndices = &nextIndex,
-            .waitSemaphoreCount = 0,
-            .pWaitSemaphores = nullptr,
-            .pResults = &result,
-    };
-    vkQueuePresentKHR(device.queue_, &presentInfo);
-    return true;
-}
-
-
-void nufrag::vulkan::Engine::start(android_app* app) {
+void nufrag::vulkan::Engine::start(android_app *app) {
     androidAppCtx = app;
 
     if (!InitVulkan()) {
@@ -813,15 +748,58 @@ void nufrag::vulkan::Engine::start(android_app* app) {
 }
 
 bool nufrag::vulkan::Engine::ready() {
-    return false;
+    return device.initialized_;
 }
 
 void nufrag::vulkan::Engine::update() {
+    uint32_t nextIndex;
+    // Get the framebuffer index we should draw in
+    CALL_VK(vkAcquireNextImageKHR(device.device_, swapchain.swapchain_,
+                                  UINT64_MAX, render.semaphore_,
+                                  VK_NULL_HANDLE, &nextIndex));
+    CALL_VK(vkResetFences(device.device_, 1, &render.fence_));
+    VkSubmitInfo submit_info = {
+            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+            .pNext = nullptr,
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &render.semaphore_,
+            .commandBufferCount = 1,
+            .pCommandBuffers = &render.cmdBuffer_[nextIndex],
+            .signalSemaphoreCount = 0,
+            .pSignalSemaphores = nullptr
+    };
+    CALL_VK(vkQueueSubmit(device.queue_, 1, &submit_info, render.fence_));
+    CALL_VK(vkWaitForFences(device.device_, 1, &render.fence_, VK_TRUE, 100000000));
 
+    LOGI(std::string("Drawing frames......"));
+
+    VkResult result;
+    VkPresentInfoKHR presentInfo{
+            .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+            .pNext = nullptr,
+            .swapchainCount = 1,
+            .pSwapchains = &swapchain.swapchain_,
+            .pImageIndices = &nextIndex,
+            .waitSemaphoreCount = 0,
+            .pWaitSemaphores = nullptr,
+            .pResults = &result,
+    };
+    vkQueuePresentKHR(device.queue_, &presentInfo);
 }
 
 void nufrag::vulkan::Engine::terminate() {
+    vkFreeCommandBuffers(device.device_, render.cmdPool_,
+                         render.cmdBufferLen_, render.cmdBuffer_);
+    delete[] render.cmdBuffer_;
 
+    vkDestroyCommandPool(device.device_, render.cmdPool_, nullptr);
+    vkDestroyRenderPass(device.device_, render.renderPass_, nullptr);
+    DeleteSwapChain();
+    DeleteGraphicsPipeline();
+    DeleteBuffers();
+
+    vkDestroyDevice(device.device_, nullptr);
+    vkDestroyInstance(device.instance_, nullptr);
+
+    device.initialized_ = false;
 }
-
-
