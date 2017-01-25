@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // This file is generated.
-#include "vulkan_wrapper.h"
+#include "loader.hpp"
 #include <dlfcn.h>
 
 int InitVulkan(void) {

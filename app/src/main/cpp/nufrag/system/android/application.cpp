@@ -18,7 +18,7 @@ static void handle_cmd(android_app *app, int32_t cmd) {
     RenderEngine *engine = data->engine;
     switch (cmd) {
         case APP_CMD_INIT_WINDOW:
-            engine->start();
+            engine->start(app);
             core_app->start(engine);
             break;
         case APP_CMD_TERM_WINDOW:
