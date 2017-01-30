@@ -8,11 +8,13 @@ add_library(
     main SHARED
     ${APP_SRC_DIR}/nufrag/core/application.cpp
     ${APP_SRC_DIR}/nufrag/core/build-configuration.cpp
+    ${APP_SRC_DIR}/nufrag/core/static.cpp
     ${APP_SRC_DIR}/nufrag/render/engine.cpp
     ${APP_SRC_DIR}/nufrag/system/android/application.cpp
     ${APP_SRC_DIR}/nufrag/system/android/log.cpp
     ${APP_SRC_DIR}/nufrag/system/log.cpp
     ${APP_SRC_DIR}/nufrag/vulkan/engine.cpp
+    ${APP_SRC_DIR}/nufrag/vulkan/instance.cpp
     ${APP_SRC_DIR}/nufrag/vulkan/loader.cpp
 )
 # include_directories(${VK_VAL_LAYER_SRC_DIR}/include)

@@ -9,7 +9,7 @@ namespace gearoenix {
                 enum ShaderType {
                     VERTEX_SHADER, FRAGMENT_SHADER
                 };
-                void create_device(ANativeWindow *platformWindow, VkApplicationInfo *appInfo);
+                void create_device(ANativeWindow *platformWindow);
                 void create_swapchain();
                 void create_framebuffers(VkRenderPass &renderPass, VkImageView depthView = VK_NULL_HANDLE);
                 bool map_memory_type_to_index(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
