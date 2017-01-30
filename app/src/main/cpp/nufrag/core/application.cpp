@@ -1,6 +1,6 @@
 #include "application.hpp"
 
-void nufrag::core::Application::start(RenderEngine *){
+void nufrag::core::Application::start(RENDER_ENGINE *){
 
 }
 

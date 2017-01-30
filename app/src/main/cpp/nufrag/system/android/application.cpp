@@ -1,7 +1,5 @@
-#include "application.hpp"
 #include <android_native_app_glue.h>
 #include "../../core/application.hpp"
-#include "../../render/engine.hpp"
 #include "../log.hpp"
 #include <string>
 #define CORE_APP nufrag::core::Application
@@ -9,13 +7,13 @@
 class AppData {
 public:
     CORE_APP *core_app;
-    RenderEngine *engine;
+    RENDER_ENGINE *engine;
 };
 
 static void handle_cmd(android_app *app, int32_t cmd) {
     AppData *data = static_cast<AppData *>(app->userData);
     CORE_APP *core_app = data->core_app;
-    RenderEngine *engine = data->engine;
+    RENDER_ENGINE *engine = data->engine;
     switch (cmd) {
         case APP_CMD_INIT_WINDOW:
             engine->start(app);
@@ -33,7 +31,7 @@ static void handle_cmd(android_app *app, int32_t cmd) {
 void android_main(struct android_app *app) {
     app_dummy();
     CORE_APP *core_app = new CORE_APP;
-    RenderEngine *engine = new RenderEngine;
+    RENDER_ENGINE *engine = new RENDER_ENGINE;
     AppData *data = new AppData;
     data->core_app = core_app;
     data->engine = engine;

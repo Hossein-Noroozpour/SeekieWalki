@@ -3,9 +3,9 @@
 namespace nufrag {
     namespace core {
         class Application {
-//            RenderEngine *render_engine;
+//            RENDER_ENGINE *render_engine;
         public:
-            void start(RenderEngine *engine);
+            void start(RENDER_ENGINE *engine);
             void update();
             void terminate();
         };
