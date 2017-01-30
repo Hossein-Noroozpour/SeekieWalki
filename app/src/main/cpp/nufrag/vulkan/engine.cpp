@@ -1,9 +1,7 @@
 #include "engine.hpp"
+#include "../system/log.hpp"
 #include <vector>
 #include <cassert>
-#include <android/log.h>
-#include "../system/log.hpp"
-#include "loader.hpp"
 #include <string>
 
 #define CALL_VK(func)                                                 \
@@ -66,7 +64,7 @@ VulkanRenderInfo render;
 android_app *androidAppCtx = nullptr;
 
 // Create vulkan device
-void CreateVulkanDevice(ANativeWindow *platformWindow, VkApplicationInfo *appInfo) {
+void gearoenix::nufrag::vulkan::Engine::create_device(ANativeWindow *platformWindow, VkApplicationInfo *appInfo) {
     std::vector<const char *> instance_extensions;
     std::vector<const char *> device_extensions;
 
@@ -86,22 +84,22 @@ void CreateVulkanDevice(ANativeWindow *platformWindow, VkApplicationInfo *appInf
             .enabledLayerCount = 0,
             .ppEnabledLayerNames = nullptr,
     };
-    CALL_VK(vkCreateInstance(&instanceCreateInfo, nullptr, &device.instance_));
+    CALL_VK(l->create_instance(&instanceCreateInfo, nullptr, &device.instance_));
     VkAndroidSurfaceCreateInfoKHR createInfo{
             .sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
             .pNext = nullptr,
             .flags = 0,
             .window = platformWindow};
 
-    CALL_VK(vkCreateAndroidSurfaceKHR(device.instance_, &createInfo, nullptr,
+    CALL_VK(l->vkCreateAndroidSurfaceKHR(device.instance_, &createInfo, nullptr,
                                       &device.surface_));
     // Find one GPU to use:
     // On Android, every GPU device is equal -- supporting graphics/compute/present
     // for this sample, we use the very first GPU device found on the system
     uint32_t gpuCount = 0;
-    CALL_VK(vkEnumeratePhysicalDevices(device.instance_, &gpuCount, nullptr));
+    CALL_VK(l->enumerate_physical_devices(device.instance_, &gpuCount, nullptr));
     VkPhysicalDevice tmpGpus[gpuCount];
-    CALL_VK(vkEnumeratePhysicalDevices(device.instance_, &gpuCount, tmpGpus));
+    CALL_VK(l->enumerate_physical_devices(device.instance_, &gpuCount, tmpGpus));
     device.gpuDevice_ = tmpGpus[0];     // Pick up the first GPU Device
 
     // Create a logical device (vulkan device)
@@ -127,12 +125,12 @@ void CreateVulkanDevice(ANativeWindow *platformWindow, VkApplicationInfo *appInf
             .pEnabledFeatures = nullptr,
     };
 
-    CALL_VK(vkCreateDevice(device.gpuDevice_, &deviceCreateInfo, nullptr,
+    CALL_VK(l->vkCreateDevice(device.gpuDevice_, &deviceCreateInfo, nullptr,
                            &device.device_));
-    vkGetDeviceQueue(device.device_, 0, 0, &device.queue_);
+    l->vkGetDeviceQueue(device.device_, 0, 0, &device.queue_);
 }
 
-void CreateSwapChain() {
+void gearoenix::nufrag::vulkan::Engine::create_swapchain() {
     LOGI(std::string("->createSwapChain"));
     memset(&swapchain, 0, sizeof(swapchain));
 
@@ -142,14 +140,14 @@ void CreateSwapChain() {
     //   - It's necessary to query the supported surface format (R8G8B8A8 for
     //   instance ...)
     VkSurfaceCapabilitiesKHR surfaceCapabilities;
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device.gpuDevice_, device.surface_,
+    l->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device.gpuDevice_, device.surface_,
                                               &surfaceCapabilities);
     // Query the list of supported surface format and choose one we like
     uint32_t formatCount = 0;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device.gpuDevice_, device.surface_,
+    l->vkGetPhysicalDeviceSurfaceFormatsKHR(device.gpuDevice_, device.surface_,
                                          &formatCount, nullptr);
     VkSurfaceFormatKHR *formats = new VkSurfaceFormatKHR[formatCount];
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device.gpuDevice_, device.surface_,
+    l->vkGetPhysicalDeviceSurfaceFormatsKHR(device.gpuDevice_, device.surface_,
                                          &formatCount, formats);
     LOGI(std::string("Got formats") + std::to_string(formatCount));
 
@@ -185,24 +183,22 @@ void CreateSwapChain() {
             .oldSwapchain = VK_NULL_HANDLE,
             .clipped = VK_FALSE,
     };
-    CALL_VK(vkCreateSwapchainKHR(device.device_, &swapchainCreateInfo,
+    CALL_VK(l->vkCreateSwapchainKHR(device.device_, &swapchainCreateInfo,
                                  nullptr, &swapchain.swapchain_));
 
     // Get the length of the created swap chain
-    CALL_VK(vkGetSwapchainImagesKHR(device.device_, swapchain.swapchain_,
+    CALL_VK(l->vkGetSwapchainImagesKHR(device.device_, swapchain.swapchain_,
                                     &swapchain.swapchainLength_, nullptr));
     delete[] formats;
     LOGI(std::string("<-createSwapChain"));
 }
 
-void CreateFrameBuffers(VkRenderPass &renderPass, VkImageView depthView = VK_NULL_HANDLE) {
-
-    // query display attachment to swapchain
+void gearoenix::nufrag::vulkan::Engine::create_framebuffers(VkRenderPass &renderPass, VkImageView depthView) {
     uint32_t SwapchainImagesCount = 0;
-    CALL_VK(vkGetSwapchainImagesKHR(device.device_, swapchain.swapchain_,
+    CALL_VK(l->vkGetSwapchainImagesKHR(device.device_, swapchain.swapchain_,
                                     &SwapchainImagesCount, nullptr));
     VkImage *displayImages = new VkImage[SwapchainImagesCount];
-    CALL_VK(vkGetSwapchainImagesKHR(device.device_, swapchain.swapchain_,
+    CALL_VK(l->vkGetSwapchainImagesKHR(device.device_, swapchain.swapchain_,
                                     &SwapchainImagesCount, displayImages));
 
     // create image view for each swapchain image
@@ -229,7 +225,7 @@ void CreateFrameBuffers(VkRenderPass &renderPass, VkImageView depthView = VK_NUL
                 },
                 .flags = 0,
         };
-        CALL_VK(vkCreateImageView(device.device_, &viewCreateInfo, nullptr,
+        CALL_VK(l->vkCreateImageView(device.device_, &viewCreateInfo, nullptr,
                                   &swapchain.displayViews_[i]));
     }
     delete[] displayImages;
@@ -252,15 +248,15 @@ void CreateFrameBuffers(VkRenderPass &renderPass, VkImageView depthView = VK_NUL
         };
         fbCreateInfo.attachmentCount = (depthView == VK_NULL_HANDLE ? 1 : 2);
 
-        CALL_VK(vkCreateFramebuffer(device.device_, &fbCreateInfo, nullptr,
+        CALL_VK(l->vkCreateFramebuffer(device.device_, &fbCreateInfo, nullptr,
                                     &swapchain.framebuffers_[i]));
     }
 }
 
 // A helper function
-bool MapMemoryTypeToIndex(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex) {
+bool gearoenix::nufrag::vulkan::Engine::map_memory_type_to_index(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex) {
     VkPhysicalDeviceMemoryProperties memoryProperties;
-    vkGetPhysicalDeviceMemoryProperties(device.gpuDevice_, &memoryProperties);
+    l->vkGetPhysicalDeviceMemoryProperties(device.gpuDevice_, &memoryProperties);
     // Search memtypes to find first index with those properties
     for (uint32_t i = 0; i < 32; i++) {
         if ((typeBits & 1) == 1) {
@@ -277,7 +273,7 @@ bool MapMemoryTypeToIndex(uint32_t typeBits, VkFlags requirements_mask, uint32_t
 }
 
 // Create our vertex buffer
-bool CreateBuffers(void) {
+bool gearoenix::nufrag::vulkan::Engine::create_buffers() {
     // -----------------------------------------------
     // Create the triangle vertex buffer
 
@@ -301,11 +297,11 @@ bool CreateBuffers(void) {
             .queueFamilyIndexCount = 1,
     };
 
-    CALL_VK(vkCreateBuffer(device.device_, &createBufferInfo, nullptr,
+    CALL_VK(l->vkCreateBuffer(device.device_, &createBufferInfo, nullptr,
                            &buffers.vertexBuf));
 
     VkMemoryRequirements memReq;
-    vkGetBufferMemoryRequirements(device.device_, buffers.vertexBuf, &memReq);
+    l->vkGetBufferMemoryRequirements(device.device_, buffers.vertexBuf, &memReq);
 
     VkMemoryAllocateInfo allocInfo{
             .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -316,51 +312,45 @@ bool CreateBuffers(void) {
 
     // Assign the proper memory type for that buffer
     allocInfo.allocationSize = memReq.size;
-    MapMemoryTypeToIndex(memReq.memoryTypeBits,
-                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-                         &allocInfo.memoryTypeIndex);
+    map_memory_type_to_index(memReq.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &allocInfo.memoryTypeIndex);
 
     // Allocate memory for the buffer
     VkDeviceMemory deviceMemory;
-    CALL_VK(vkAllocateMemory(device.device_, &allocInfo, nullptr, &deviceMemory));
+    CALL_VK(l->vkAllocateMemory(device.device_, &allocInfo, nullptr, &deviceMemory));
 
     void *data;
-    CALL_VK(vkMapMemory(device.device_, deviceMemory, 0, sizeof(vertexData), 0,
+    CALL_VK(l->vkMapMemory(device.device_, deviceMemory, 0, sizeof(vertexData), 0,
                         &data));
     memcpy(data, vertexData, sizeof(vertexData));
-    vkUnmapMemory(device.device_, deviceMemory);
+    l->vkUnmapMemory(device.device_, deviceMemory);
 
-    CALL_VK(vkBindBufferMemory(device.device_, buffers.vertexBuf, deviceMemory, 0));
+    CALL_VK(l->vkBindBufferMemory(device.device_, buffers.vertexBuf, deviceMemory, 0));
     return true;
 }
 
-void DeleteBuffers(void) {
-    vkDestroyBuffer(device.device_, buffers.vertexBuf, nullptr);
+void gearoenix::nufrag::vulkan::Engine::delete_buffers() {
+    l->vkDestroyBuffer(device.device_, buffers.vertexBuf, nullptr);
 }
 
-enum ShaderType {
-    VERTEX_SHADER, FRAGMENT_SHADER
-};
-
-VkResult loadShaderFromFile(const char *filePath, VkShaderModule *shaderOut, ShaderType type) {
+VkResult gearoenix::nufrag::vulkan::Engine::load_shader_from_file(const char *filePath, VkShaderModule *shaderOut, ShaderType) {
     // Read the file
     assert(androidAppCtx);
     AAsset *file = AAssetManager_open(androidAppCtx->activity->assetManager,
                                       filePath, AASSET_MODE_BUFFER);
-    size_t fileLength = AAsset_getLength(file);
+    off_t fileLength = AAsset_getLength(file);
 
     char *fileContent = new char[fileLength];
 
-    AAsset_read(file, fileContent, fileLength);
+    AAsset_read(file, fileContent, (size_t) fileLength);
 
     VkShaderModuleCreateInfo shaderModuleCreateInfo{
             .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
             .pNext = nullptr,
-            .codeSize = fileLength,
+            .codeSize = (size_t) fileLength,
             .pCode = (const uint32_t *) fileContent,
             .flags = 0,
     };
-    VkResult result = vkCreateShaderModule(
+    VkResult result = l->vkCreateShaderModule(
             device.device_, &shaderModuleCreateInfo, nullptr, shaderOut);
     assert(result == VK_SUCCESS);
 
@@ -369,7 +359,7 @@ VkResult loadShaderFromFile(const char *filePath, VkShaderModule *shaderOut, Sha
     return result;
 }
 
-VkResult CreateGraphicsPipeline() {
+VkResult gearoenix::nufrag::vulkan::Engine::create_graphics_pipeline() {
     memset(&gfxPipeline, 0, sizeof(gfxPipeline));
     // Create pipeline layout (empty)
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{
@@ -380,8 +370,7 @@ VkResult CreateGraphicsPipeline() {
             .pushConstantRangeCount = 0,
             .pPushConstantRanges = nullptr,
     };
-    CALL_VK(vkCreatePipelineLayout(device.device_, &pipelineLayoutCreateInfo,
-                                   nullptr, &gfxPipeline.layout));
+    CALL_VK(l->vkCreatePipelineLayout(device.device_, &pipelineLayoutCreateInfo, nullptr, &gfxPipeline.layout));
 
     // No dynamic state in that tutorial
     VkPipelineDynamicStateCreateInfo dynamicStateInfo = {
@@ -391,8 +380,8 @@ VkResult CreateGraphicsPipeline() {
             .pDynamicStates = nullptr};
 
     VkShaderModule vertexShader, fragmentShader;
-    loadShaderFromFile("shaders/tri.vert.spv", &vertexShader, VERTEX_SHADER);
-    loadShaderFromFile("shaders/tri.frag.spv", &fragmentShader, FRAGMENT_SHADER);
+    load_shader_from_file("shaders/tri.vert.spv", &vertexShader, VERTEX_SHADER);
+    load_shader_from_file("shaders/tri.frag.spv", &fragmentShader, FRAGMENT_SHADER);
 
     // Specify vertex and fragment shader stages
     VkPipelineShaderStageCreateInfo shaderStages[2]{
@@ -521,7 +510,7 @@ VkResult CreateGraphicsPipeline() {
             .flags = 0,  // reserved, must be 0
     };
 
-    CALL_VK(vkCreatePipelineCache(device.device_, &pipelineCacheInfo, nullptr,
+    CALL_VK(l->vkCreatePipelineCache(device.device_, &pipelineCacheInfo, nullptr,
                                   &gfxPipeline.cache));
 
     // Create the pipeline
@@ -548,41 +537,39 @@ VkResult CreateGraphicsPipeline() {
     };
 
     VkResult pipelineResult =
-            vkCreateGraphicsPipelines(device.device_, gfxPipeline.cache, 1,
+            l->vkCreateGraphicsPipelines(device.device_, gfxPipeline.cache, 1,
                                       &pipelineCreateInfo, nullptr, &gfxPipeline.pipeline);
 
     // We don't need the shaders anymore, we can release their memory
-    vkDestroyShaderModule(device.device_, vertexShader, nullptr);
-    vkDestroyShaderModule(device.device_, fragmentShader, nullptr);
+    l->vkDestroyShaderModule(device.device_, vertexShader, nullptr);
+    l->vkDestroyShaderModule(device.device_, fragmentShader, nullptr);
 
     return pipelineResult;
 }
 
-void DeleteGraphicsPipeline(void) {
+void gearoenix::nufrag::vulkan::Engine::delete_graphics_pipeline() {
     if (gfxPipeline.pipeline == VK_NULL_HANDLE)
         return;
-    vkDestroyPipeline(device.device_, gfxPipeline.pipeline, nullptr);
-    vkDestroyPipelineCache(device.device_, gfxPipeline.cache, nullptr);
-    vkDestroyPipelineLayout(device.device_, gfxPipeline.layout, nullptr);
+    l->vkDestroyPipeline(device.device_, gfxPipeline.pipeline, nullptr);
+    l->vkDestroyPipelineCache(device.device_, gfxPipeline.cache, nullptr);
+    l->vkDestroyPipelineLayout(device.device_, gfxPipeline.layout, nullptr);
 }
 
-void DeleteSwapChain() {
+void gearoenix::nufrag::vulkan::Engine::delete_swapchain() {
     for (int i = 0; i < swapchain.swapchainLength_; i++) {
-        vkDestroyFramebuffer(device.device_, swapchain.framebuffers_[i], nullptr);
-        vkDestroyImageView(device.device_, swapchain.displayViews_[i], nullptr);
+        l->vkDestroyFramebuffer(device.device_, swapchain.framebuffers_[i], nullptr);
+        l->vkDestroyImageView(device.device_, swapchain.displayViews_[i], nullptr);
     }
     delete[] swapchain.framebuffers_;
     delete[] swapchain.displayViews_;
 
-    vkDestroySwapchainKHR(device.device_, swapchain.swapchain_, nullptr);
+    l->vkDestroySwapchainKHR(device.device_, swapchain.swapchain_, nullptr);
 }
 
-void nufrag::vulkan::Engine::start(android_app *app) {
+void gearoenix::nufrag::vulkan::Engine::start(android_app *app) {
     androidAppCtx = app;
 
-    if (!InitVulkan()) {
-        LOGF(std::string("Vulkan is unavailable, install vulkan and re-start"));
-    }
+    l = new Loader;
 
     VkApplicationInfo appInfo = {
             .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -595,9 +582,9 @@ void nufrag::vulkan::Engine::start(android_app *app) {
     };
 
     // create a device
-    CreateVulkanDevice(app->window, &appInfo);
+    create_device(app->window, &appInfo);
 
-    CreateSwapChain();
+    create_swapchain();
 
     // -----------------------------------------------------------------
     // Create render pass
@@ -637,17 +624,17 @@ void nufrag::vulkan::Engine::start(android_app *app) {
             .dependencyCount = 0,
             .pDependencies = nullptr,
     };
-    CALL_VK(vkCreateRenderPass(device.device_, &renderPassCreateInfo,
+    CALL_VK(l->create_render_pass(device.device_, &renderPassCreateInfo,
                                nullptr, &render.renderPass_));
 
     // -----------------------------------------------------------------
     // Create 2 frame buffers.
-    CreateFrameBuffers(render.renderPass_);
+    create_framebuffers(render.renderPass_);
 
-    CreateBuffers();    // create vertex buffers
+    create_buffers();    // create vertex buffers
 
     // Create graphics pipeline
-    CreateGraphicsPipeline();
+    create_graphics_pipeline();
 
     // -----------------------------------------------
     // Create a pool of command buffers to allocate command buffer from
@@ -657,7 +644,7 @@ void nufrag::vulkan::Engine::start(android_app *app) {
             .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
             .queueFamilyIndex = 0,
     };
-    CALL_VK(vkCreateCommandPool(device.device_, &cmdPoolCreateInfo,
+    CALL_VK(l->vkCreateCommandPool(device.device_, &cmdPoolCreateInfo,
                                 nullptr, &render.cmdPool_));
 
     // Record a command buffer that just clear the screen
@@ -672,7 +659,7 @@ void nufrag::vulkan::Engine::start(android_app *app) {
             .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
             .commandBufferCount = render.cmdBufferLen_,
     };
-    CALL_VK(vkAllocateCommandBuffers(device.device_,
+    CALL_VK(l->vkAllocateCommandBuffers(device.device_,
                                      &cmdBufferCreateInfo,
                                      render.cmdBuffer_));
 
@@ -685,7 +672,7 @@ void nufrag::vulkan::Engine::start(android_app *app) {
                 .flags = 0,
                 .pInheritanceInfo = nullptr,
         };
-        CALL_VK(vkBeginCommandBuffer(render.cmdBuffer_[bufferIndex],
+        CALL_VK(l->vkBeginCommandBuffer(render.cmdBuffer_[bufferIndex],
                                      &cmdBufferBeginInfo));
 
         // Now we start a renderpass. Any draw command has to be recorded in a
@@ -708,20 +695,20 @@ void nufrag::vulkan::Engine::start(android_app *app) {
                 .clearValueCount = 1,
                 .pClearValues = &clearVals
         };
-        vkCmdBeginRenderPass(render.cmdBuffer_[bufferIndex], &renderPassBeginInfo,
+        l->vkCmdBeginRenderPass(render.cmdBuffer_[bufferIndex], &renderPassBeginInfo,
                              VK_SUBPASS_CONTENTS_INLINE);
         // Bind what is necessary to the command buffer
-        vkCmdBindPipeline(render.cmdBuffer_[bufferIndex], VK_PIPELINE_BIND_POINT_GRAPHICS,
+        l->vkCmdBindPipeline(render.cmdBuffer_[bufferIndex], VK_PIPELINE_BIND_POINT_GRAPHICS,
                           gfxPipeline.pipeline);
         VkDeviceSize offset = 0;
-        vkCmdBindVertexBuffers(render.cmdBuffer_[bufferIndex], 0, 1, &buffers.vertexBuf,
+        l->vkCmdBindVertexBuffers(render.cmdBuffer_[bufferIndex], 0, 1, &buffers.vertexBuf,
                                &offset);
 
         // Draw Triangle
-        vkCmdDraw(render.cmdBuffer_[bufferIndex], 3, 1, 0, 0);
+        l->vkCmdDraw(render.cmdBuffer_[bufferIndex], 3, 1, 0, 0);
 
-        vkCmdEndRenderPass(render.cmdBuffer_[bufferIndex]);
-        CALL_VK(vkEndCommandBuffer(render.cmdBuffer_[bufferIndex]));
+        l->vkCmdEndRenderPass(render.cmdBuffer_[bufferIndex]);
+        CALL_VK(l->vkEndCommandBuffer(render.cmdBuffer_[bufferIndex]));
     }
 
     // We need to create a fence to be able, in the main loop, to wait for our
@@ -731,7 +718,7 @@ void nufrag::vulkan::Engine::start(android_app *app) {
             .pNext = nullptr,
             .flags = 0,
     };
-    CALL_VK(vkCreateFence(device.device_, &fenceCreateInfo,
+    CALL_VK(l->vkCreateFence(device.device_, &fenceCreateInfo,
                           nullptr, &render.fence_));
 
     // We need to create a semaphore to be able to wait, in the main loop, for our
@@ -741,23 +728,23 @@ void nufrag::vulkan::Engine::start(android_app *app) {
             .pNext = nullptr,
             .flags = 0,
     };
-    CALL_VK(vkCreateSemaphore(device.device_, &semaphoreCreateInfo,
+    CALL_VK(l->vkCreateSemaphore(device.device_, &semaphoreCreateInfo,
                               nullptr, &render.semaphore_));
 
     device.initialized_ = true;
 }
 
-bool nufrag::vulkan::Engine::ready() {
+bool gearoenix::nufrag::vulkan::Engine::ready() {
     return device.initialized_;
 }
 
-void nufrag::vulkan::Engine::update() {
+void gearoenix::nufrag::vulkan::Engine::update() {
     uint32_t nextIndex;
     // Get the framebuffer index we should draw in
-    CALL_VK(vkAcquireNextImageKHR(device.device_, swapchain.swapchain_,
+    CALL_VK(l->vkAcquireNextImageKHR(device.device_, swapchain.swapchain_,
                                   UINT64_MAX, render.semaphore_,
                                   VK_NULL_HANDLE, &nextIndex));
-    CALL_VK(vkResetFences(device.device_, 1, &render.fence_));
+    CALL_VK(l->vkResetFences(device.device_, 1, &render.fence_));
     VkSubmitInfo submit_info = {
             .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
             .pNext = nullptr,
@@ -768,8 +755,8 @@ void nufrag::vulkan::Engine::update() {
             .signalSemaphoreCount = 0,
             .pSignalSemaphores = nullptr
     };
-    CALL_VK(vkQueueSubmit(device.queue_, 1, &submit_info, render.fence_));
-    CALL_VK(vkWaitForFences(device.device_, 1, &render.fence_, VK_TRUE, 100000000));
+    CALL_VK(l->vkQueueSubmit(device.queue_, 1, &submit_info, render.fence_));
+    CALL_VK(l->vkWaitForFences(device.device_, 1, &render.fence_, VK_TRUE, 100000000));
 
     LOGI(std::string("Drawing frames......"));
 
@@ -784,22 +771,18 @@ void nufrag::vulkan::Engine::update() {
             .pWaitSemaphores = nullptr,
             .pResults = &result,
     };
-    vkQueuePresentKHR(device.queue_, &presentInfo);
+    l->vkQueuePresentKHR(device.queue_, &presentInfo);
 }
 
-void nufrag::vulkan::Engine::terminate() {
-    vkFreeCommandBuffers(device.device_, render.cmdPool_,
-                         render.cmdBufferLen_, render.cmdBuffer_);
+void gearoenix::nufrag::vulkan::Engine::terminate() {
+    l->vkFreeCommandBuffers(device.device_, render.cmdPool_, render.cmdBufferLen_, render.cmdBuffer_);
     delete[] render.cmdBuffer_;
-
-    vkDestroyCommandPool(device.device_, render.cmdPool_, nullptr);
-    vkDestroyRenderPass(device.device_, render.renderPass_, nullptr);
-    DeleteSwapChain();
-    DeleteGraphicsPipeline();
-    DeleteBuffers();
-
-    vkDestroyDevice(device.device_, nullptr);
-    vkDestroyInstance(device.instance_, nullptr);
-
+    l->vkDestroyCommandPool(device.device_, render.cmdPool_, nullptr);
+    l->vkDestroyRenderPass(device.device_, render.renderPass_, nullptr);
+    delete_swapchain();
+    delete_graphics_pipeline();
+    delete_buffers();
+    l->vkDestroyDevice(device.device_, nullptr);
+    l->destroy_instance(device.instance_, nullptr);
     device.initialized_ = false;
 }
