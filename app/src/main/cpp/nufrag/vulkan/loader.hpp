@@ -1,4 +1,14 @@
 #pragma once
+#include "../core/build-configuration.hpp"
+#ifdef IN_ANDROID
+#define VK_USE_PLATFORM_ANDROID_KHR
+#elif IN_LINUX
+#error "It is not implemented yet!"
+#elif IN_WINDOWS
+#error "It is not implemented yet!"
+#else
+#error "It is not implemented yet!"
+#endif
 #define VK_NO_PROTOTYPES 1
 #include <vulkan/vulkan.h>
 namespace gearoenix {

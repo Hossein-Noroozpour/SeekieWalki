@@ -13,12 +13,14 @@ add_library(
     ${APP_SRC_DIR}/nufrag/system/android/application.cpp
     ${APP_SRC_DIR}/nufrag/system/android/log.cpp
     ${APP_SRC_DIR}/nufrag/system/log.cpp
+    ${APP_SRC_DIR}/nufrag/vulkan/device/physical.cpp
     ${APP_SRC_DIR}/nufrag/vulkan/engine.cpp
     ${APP_SRC_DIR}/nufrag/vulkan/instance.cpp
     ${APP_SRC_DIR}/nufrag/vulkan/loader.cpp
+    ${APP_SRC_DIR}/nufrag/vulkan/surface.cpp
 )
 # include_directories(${VK_VAL_LAYER_SRC_DIR}/include)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Werror -Wno-unused-variable \
-    -DVK_USE_PLATFORM_ANDROID_KHR -frtti -fexceptions")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Werror -Wno-unused-variable -frtti \
+    -fexceptions")
 target_link_libraries(main app-glue log android vulkan)
