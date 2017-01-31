@@ -7,9 +7,9 @@ namespace gearoenix {
             namespace device {
                 class Physical {
                 public:
-                    Instance *i;
+                    Instance *i = nullptr;
                     VkPhysicalDevice v;
-                    Physical(Instance *i, Loader *l);
+                    Physical(Instance *i);
                     ~Physical();
                 };
             }

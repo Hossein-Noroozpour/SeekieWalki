@@ -1,14 +1,18 @@
-//
-// Created by hossein on 1/31/17.
-//
-
-#ifndef SEEKIEWALKI_LOGICAL_HPP
-#define SEEKIEWALKI_LOGICAL_HPP
-
-
-class logical {
-
-};
-
-
-#endif //SEEKIEWALKI_LOGICAL_HPP
+#pragma once
+#include "../loader.hpp"
+#include "physical.hpp"
+namespace gearoenix {
+    namespace nufrag {
+        namespace vulkan {
+            namespace device {
+                class Logical {
+                public:
+                    Physical *p = nullptr;
+                    VkDevice v;
+                    Logical(Physical *p);
+                    ~Logical();
+                };
+            }
+        }
+    }
+}

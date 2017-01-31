@@ -13,6 +13,7 @@ add_library(
     ${APP_SRC_DIR}/nufrag/system/android/application.cpp
     ${APP_SRC_DIR}/nufrag/system/android/log.cpp
     ${APP_SRC_DIR}/nufrag/system/log.cpp
+    ${APP_SRC_DIR}/nufrag/vulkan/device/logical.cpp
     ${APP_SRC_DIR}/nufrag/vulkan/device/physical.cpp
     ${APP_SRC_DIR}/nufrag/vulkan/engine.cpp
     ${APP_SRC_DIR}/nufrag/vulkan/instance.cpp

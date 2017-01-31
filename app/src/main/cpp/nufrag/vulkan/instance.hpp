@@ -5,7 +5,7 @@ namespace gearoenix {
         namespace vulkan {
             class Instance {
             public:
-                Loader *l;
+                Loader *l = nullptr;
                 VkInstance v;
                 Instance(Loader *l);
                 ~Instance();
