@@ -6,19 +6,20 @@ add_library( app-glue STATIC ${APP_GLUE_DIR}/android_native_app_glue.c)
 set(APP_SRC_DIR src/main/cpp)
 add_library(
     main SHARED
-    ${APP_SRC_DIR}/nufrag/core/application.cpp
-    ${APP_SRC_DIR}/nufrag/core/build-configuration.cpp
-    ${APP_SRC_DIR}/nufrag/core/static.cpp
-    ${APP_SRC_DIR}/nufrag/render/engine.cpp
-    ${APP_SRC_DIR}/nufrag/system/android/application.cpp
-    ${APP_SRC_DIR}/nufrag/system/android/log.cpp
-    ${APP_SRC_DIR}/nufrag/system/log.cpp
-    ${APP_SRC_DIR}/nufrag/vulkan/device/logical.cpp
-    ${APP_SRC_DIR}/nufrag/vulkan/device/physical.cpp
-    ${APP_SRC_DIR}/nufrag/vulkan/engine.cpp
-    ${APP_SRC_DIR}/nufrag/vulkan/instance.cpp
-    ${APP_SRC_DIR}/nufrag/vulkan/loader.cpp
-    ${APP_SRC_DIR}/nufrag/vulkan/surface.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/core/application.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/core/build-configuration.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/core/static.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/core/tree-object.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/render/engine.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/system/android/application.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/system/android/log.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/system/log.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/vulkan/device/logical.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/vulkan/device/physical.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/vulkan/engine.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/vulkan/instance.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/vulkan/loader.cpp
+    ${APP_SRC_DIR}/gearoenix/nufrag/vulkan/surface.cpp
 )
 # include_directories(${VK_VAL_LAYER_SRC_DIR}/include)
 
