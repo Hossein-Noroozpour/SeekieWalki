@@ -14,5 +14,23 @@ gearoenix::nufrag::vulkan::device::Physical::~Physical() {
 
 }
 
+VkSurfaceCapabilitiesKHR *gearoenix::nufrag::vulkan::device::Physical::get_capabilities(Surface *s) {
+    VkSurfaceCapabilitiesKHR *caps = new VkSurfaceCapabilitiesKHR;
+    i->l->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(v, s->v, caps);
+    return caps;
+}
+
+VkSurfaceFormatKHR *gearoenix::nufrag::vulkan::device::Physical::get_formats(Surface *s) {
+    uint32_t count = 0;
+    i->l->vkGetPhysicalDeviceSurfaceFormatsKHR(v, s->v, &count, nullptr);
+    VkSurfaceFormatKHR *formats = new VkSurfaceFormatKHR[count];
+    i->l->vkGetPhysicalDeviceSurfaceFormatsKHR(v, s->v, &count, formats);
+    return formats;
+}
+
+
+
+
+
 
 

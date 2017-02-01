@@ -56,7 +56,7 @@ VulkanRenderInfo render;
 android_app *androidAppCtx = nullptr;
 
 void gearoenix::nufrag::vulkan::Engine::create_device(ANativeWindow *platformWindow) {
-    device_abs.instance_ = new Instance(l, nullptr);
+    device_abs.instance_ = new Instance(l, this);
     device_abs.surface_ = new Surface(platformWindow, l, device_abs.instance_);
     device_abs.gpu = new device::Physical(device_abs.instance_);
     device_abs.dev = new device::Logical(device_abs.gpu);
@@ -65,17 +65,9 @@ void gearoenix::nufrag::vulkan::Engine::create_device(ANativeWindow *platformWin
 
 void gearoenix::nufrag::vulkan::Engine::create_swapchain() {
     LOGI(std::string("->createSwapChain"));
-    memset(&swapchain, 0, sizeof(swapchain));
-
-    VkSurfaceCapabilitiesKHR surfaceCapabilities;
-    l->vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device_abs.gpu->v, device_abs.surface_->v, &surfaceCapabilities);
-    uint32_t formatCount = 0;
-    l->vkGetPhysicalDeviceSurfaceFormatsKHR(device_abs.gpu->v, device_abs.surface_->v, &formatCount, nullptr);
-    VkSurfaceFormatKHR *formats = new VkSurfaceFormatKHR[formatCount];
-    l->vkGetPhysicalDeviceSurfaceFormatsKHR(device_abs.gpu->v, device_abs.surface_->v,
-                                         &formatCount, formats);
-    LOGI(std::string("Got formats") + std::to_string(formatCount));
-
+    std::memset(&swapchain, 0, sizeof(swapchain));
+    VkSurfaceCapabilitiesKHR *caps = device_abs.gpu->get_capabilities(device_abs.surface_);
+    VkSurfaceFormatKHR *formats = device_abs.gpu->get_formats(device_abs.surface_);
     uint32_t chosenFormat;
     for (chosenFormat = 0; chosenFormat < formatCount; chosenFormat++) {
         if (formats[chosenFormat].format == VK_FORMAT_R8G8B8A8_UNORM)
@@ -698,3 +690,15 @@ void gearoenix::nufrag::vulkan::Engine::terminate() {
     delete device_abs.instance_;
     device_abs.initialized_ = false;
 }
+
+gearoenix::nufrag::vulkan::Engine::Engine(): core::TreeObject(nullptr) {
+
+}
+
+gearoenix::nufrag::vulkan::Engine::~Engine() {
+    core::TreeObject::~TreeObject();
+}
+
+
+
+

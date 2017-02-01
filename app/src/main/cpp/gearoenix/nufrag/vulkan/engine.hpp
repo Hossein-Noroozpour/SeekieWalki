@@ -1,10 +1,11 @@
 #pragma once
 #include <android_native_app_glue.h>
 #include "loader.hpp"
+#include "../core/tree-object.hpp"
 namespace gearoenix {
     namespace nufrag {
         namespace vulkan {
-            class Engine {
+            class Engine: public core::TreeObject {
             private:
                 enum ShaderType {
                     VERTEX_SHADER, FRAGMENT_SHADER
@@ -20,8 +21,10 @@ namespace gearoenix {
                 void delete_graphics_pipeline();
                 void delete_swapchain();
 
-            public:
                 Loader *l = nullptr;
+            public:
+                Engine();
+                ~Engine();
 
                 void start(android_app *app);
 
