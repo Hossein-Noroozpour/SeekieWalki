@@ -1,7 +1,10 @@
 #pragma once
+
 #include "../loader.hpp"
 #include "../instance.hpp"
 #include "../surface.hpp"
+#include <vector>
+
 namespace gearoenix {
     namespace nufrag {
         namespace vulkan {
@@ -10,10 +13,14 @@ namespace gearoenix {
                 public:
                     Instance *i = nullptr;
                     VkPhysicalDevice v;
+
                     Physical(Instance *i);
+
                     ~Physical();
-                    VkSurfaceCapabilitiesKHR *get_capabilities(Surface *s);
-                    VkSurfaceFormatKHR *get_formats(Surface *s);
+
+                    std::shared_ptr<VkSurfaceCapabilitiesKHR> get_capabilities(Surface *s);
+
+                    std::vector<VkSurfaceFormatKHR> get_formats(Surface *s);
                 };
             }
         }

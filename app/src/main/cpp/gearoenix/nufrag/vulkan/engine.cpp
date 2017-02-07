@@ -66,16 +66,16 @@ void gearoenix::nufrag::vulkan::Engine::create_device(ANativeWindow *platformWin
 void gearoenix::nufrag::vulkan::Engine::create_swapchain() {
     LOGI(std::string("->createSwapChain"));
     std::memset(&swapchain, 0, sizeof(swapchain));
-    VkSurfaceCapabilitiesKHR *caps = device_abs.gpu->get_capabilities(device_abs.surface_);
-    VkSurfaceFormatKHR *formats = device_abs.gpu->get_formats(device_abs.surface_);
+    std::shared_ptr<VkSurfaceCapabilitiesKHR> caps = device_abs.gpu->get_capabilities(device_abs.surface_);
+    std::vector<VkSurfaceFormatKHR> formats = device_abs.gpu->get_formats(device_abs.surface_);
     uint32_t chosenFormat;
-    for (chosenFormat = 0; chosenFormat < formatCount; chosenFormat++) {
+    for (chosenFormat = 0; chosenFormat < formats.size(); chosenFormat++) {
         if (formats[chosenFormat].format == VK_FORMAT_R8G8B8A8_UNORM)
             break;
     }
-    assert(chosenFormat < formatCount);
+    assert(chosenFormat < formats.size());
 
-    swapchain.displaySize_ = surfaceCapabilities.currentExtent;
+    swapchain.displaySize_ = caps->currentExtent;
     swapchain.displayFormat_ = formats[chosenFormat].format;
 
     // **********************************************************
@@ -86,10 +86,10 @@ void gearoenix::nufrag::vulkan::Engine::create_swapchain() {
             .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
             .pNext = nullptr,
             .surface = device_abs.surface_->v,
-            .minImageCount = surfaceCapabilities.minImageCount,
+            .minImageCount = caps->minImageCount,
             .imageFormat = formats[chosenFormat].format,
             .imageColorSpace = formats[chosenFormat].colorSpace,
-            .imageExtent = surfaceCapabilities.currentExtent,
+            .imageExtent = caps->currentExtent,
             .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
             .preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
             .imageArrayLayers = 1,
@@ -100,13 +100,8 @@ void gearoenix::nufrag::vulkan::Engine::create_swapchain() {
             .oldSwapchain = VK_NULL_HANDLE,
             .clipped = VK_FALSE,
     };
-    VKC(l->vkCreateSwapchainKHR(device_abs.dev->v, &swapchainCreateInfo,
-                                 nullptr, &swapchain.swapchain_));
-
-    // Get the length of the created swap chain
-    VKC(l->vkGetSwapchainImagesKHR(device_abs.dev->v, swapchain.swapchain_,
-                                    &swapchain.swapchainLength_, nullptr));
-    delete[] formats;
+    VKC(l->vkCreateSwapchainKHR(device_abs.dev->v, &swapchainCreateInfo, nullptr, &swapchain.swapchain_));
+    VKC(l->vkGetSwapchainImagesKHR(device_abs.dev->v, swapchain.swapchain_, &swapchain.swapchainLength_, nullptr));
     LOGI(std::string("<-createSwapChain"));
 }
 
